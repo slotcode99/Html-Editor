@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced HTML Editor</title>
+    <style>
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #2e2e2e;
+            color: #dcdcdc;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        .menu {
+            background-color: #1e1e1e;
+            color: #dcdcdc;
+            padding: 10px;
+            border-bottom: 1px solid #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .menu button {
+            background-color: #333;
+            border: none;
+            color: #dcdcdc;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        .menu button:hover {
+            background-color: #555;
+        }
+        .editor-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        .line-numbers {
+            background-color: #1e1e1e;
+            color: #808080;
+            padding: 10px;
+            text-align: right;
+            user-select: none;
+            overflow: hidden;
+            width: 50px;
+            box-sizing: border-box;
+            border-right: 1px solid #333;
+        }
+        .code-editor {
+            background-color: #2e2e2e;
+            color: #dcdcdc;
+            width: calc(100% - 50px);
+            padding: 10px;
+            box-sizing: border-box;
+            border: none;
+            outline: none;
+            overflow-y: auto;
+            height: 100%;
+            resize: none;
+            font-size: 14px;
+        }
+        .menu span {
+            margin-right: auto;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="menu">
+        <span>File Menu</span>
+        <button onclick="openFile()">Open</button>
+        <button onclick="saveFile()">Save</button>
+        <button onclick="saveAs()">Save As</button>
+        <button onclick="createFolder()">Create Folder</button>
+        <button onclick="cutText()">Cut</button>
+        <button onclick="copyText()">Copy</button>
+        <button onclick="pasteText()">Paste</button>
+        <button onclick="undo()">Undo</button>
+        <button onclick="runCode()">Run</button>
+    </div>
+    <div class="editor-container">
+        <div class="line-numbers" id="lineNumbers"></div>
+        <textarea id="codeEditor" class="code-editor" placeholder="Start typing..."></textarea>
+    </div>
+    <input type="file" id="fileInput" style="display: none;" onchange="handleFileSelect(event)">
+    <input type="file" id="saveAsInput" style="display: none;" webkitdirectory directory multiple>
+    <script>
+        const codeEditor = document.getElementById('codeEditor');
+        const lineNumbers = document.getElementById('lineNumbers');
+        const fileInput = document.getElementById('fileInput');
+        const saveAsInput = document.getElementById('saveAsInput');
+
+        function updateLineNumbers() {
+            const lines = codeEditor.value.split('\n').length;
+            lineNumbers.textContent = '';
+            for (let i = 1; i <= lines; i++) {
+                lineNumbers.textContent += i + '\n';
+            }
+        }
+
+        function openFile() {
+            fileInput.click();
+        }
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    codeEditor.value = e.target.result;
+                    updateLineNumbers();
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        function saveFile() {
+            const blob = new Blob([codeEditor.value], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'code.txt';
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => {
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            }, 0);
+        }
+
+        function saveAs() {
+            saveAsInput.click();
+        }
+
+        function createFolder() {
+            alert('Folder creation is not supported in web browsers.');
+        }
+
+        function cutText() {
+            codeEditor.focus();
+            document.execCommand('cut');
+        }
+
+        function copyText() {
+            codeEditor.focus();
+            document.execCommand('copy');
+        }
+
+        function pasteText() {
+            codeEditor.focus();
+            document.execCommand('paste');
+        }
+
+        function undo() {
+            codeEditor.focus();
+            document.execCommand('undo');
+        }
+
+        function runCode() {
+            const html = codeEditor.value;
+            const blob = new Blob([html], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            window.open(url, '_blank');
+        }
+
+        codeEditor.addEventListener('input', updateLineNumbers);
+        codeEditor.addEventListener('scroll', () => {
+            lineNumbers.scrollTop = codeEditor.scrollTop;
+        });
+
+        // Initialize line numbers
+        updateLineNumbers();
+    </script>
+</body>
+</html>
